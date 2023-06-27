@@ -1,0 +1,50 @@
+syntax = "proto3";
+import "google/protobuf/empty.proto";
+
+option csharp_namespace = "CustomerServiceClient";
+
+package CustomerGrpcServer;
+
+service Customer {
+  rpc Add (CustomerRequest) returns (CustomerReply);
+  rpc Update (CustomerRequest) returns (CustomerReply);
+  rpc Delete (DeleteCustomerRequest) returns (DeleteCustomerReply);
+  rpc Get (GetCustomerRequest) returns (CustomerReply);
+  rpc GetAll (google.protobuf.Empty) returns (CustomersReply);
+}
+
+message GetCustomerRequest {
+  int32 Id = 1;
+}
+message DeleteCustomerRequest {
+  int32 Id = 1;
+}
+
+message CustomerRequest {
+        int32 Id = 1;
+        string Name = 2;
+        int32 Age = 3;
+}
+
+message CustomerReply {
+  CustomerResponse Customer = 1;
+  bool IsSuccess = 2;
+  string Message = 3;
+}
+
+message CustomersReply {
+  repeated CustomerResponse Customers = 1;
+  bool IsSuccess = 2;
+  string Message = 3;
+}
+
+message DeleteCustomerReply {
+  bool IsSuccess = 1;
+  string Message = 2;
+}
+
+message CustomerResponse{
+        int32 Id = 1;
+        string Name = 2;
+        int32 Age = 3;
+}
