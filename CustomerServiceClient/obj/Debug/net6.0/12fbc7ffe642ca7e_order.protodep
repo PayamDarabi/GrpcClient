@@ -1,0 +1,5 @@
+obj\Debug\net6.0\Protos/Order.cs \
+obj\Debug\net6.0\Protos/OrderGrpc.cs: D:/Users/p.darabi/.nuget/packages/grpc.tools/2.56.0/build/native/include/google/protobuf/empty.proto\
+ D:/Users/p.darabi/.nuget/packages/grpc.tools/2.56.0/build/native/include/google/protobuf/timestamp.proto\
+ Protos/orderItem.proto\
+ Protos/order.proto

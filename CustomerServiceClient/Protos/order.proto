@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "Protos/orderItem.proto";
+
+option csharp_namespace = "CustomerServiceClient";
+
+package CustomerGrpcServer;
+
+service Order {
+  rpc Add (OrderRequest) returns (OrderReply);
+  rpc Update (OrderRequest) returns (OrderReply);
+  rpc Delete (DeleteOrderRequest) returns (DeleteOrderReply);
+  rpc Get (GetOrderRequest) returns (OrderReply);
+  rpc GetAll (google.protobuf.Empty) returns (OrdersReply);
+}
+
+message GetOrderRequest {
+  int32 Id = 1;
+}
+message DeleteOrderRequest {
+  int32 Id = 1;
+}
+
+message OrderRequest {
+  int32 Id = 1;
+  int32 CustomerId = 2;
+  repeated OrderItemRequest OrderItems = 3;
+}
+
+message OrdersReply {
+  repeated OrderResponse Orders = 1;
+  bool IsSuccess = 2;
+  string Message = 3;
+}
+
+message OrderReply {
+  OrderResponse Order = 1;
+  bool IsSuccess = 2;
+  string Message = 3;
+}
+
+message DeleteOrderReply {
+  bool IsSuccess = 1;
+  string Message = 2;
+}
+
+message OrderResponse{
+  int32 Id = 1; 
+  int32 CustomerId = 2;
+  google.protobuf.Timestamp CreateDate = 3;
+  repeated OrderItemResponse OrderItems = 4;
+}
