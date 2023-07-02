@@ -147,11 +147,10 @@ internal class Program
                     Console.WriteLine("---------------------------------------------------");
                     Console.WriteLine("Welcome to Order area.. please enter a number: ");
                     Console.WriteLine("[1] Add Order");
-                    Console.WriteLine("[2] Update Order");
-                    Console.WriteLine("[3] Delete Order");
-                    Console.WriteLine("[4] Get Order");
-                    Console.WriteLine("[5] GetAll Order");
-                    Console.WriteLine("[6] Back To MainMenu");
+                    Console.WriteLine("[2] Delete Order");
+                    Console.WriteLine("[3] Get Order");
+                    Console.WriteLine("[4] GetAll Order");
+                    Console.WriteLine("[5] Back To MainMenu");
 
                     isValid = int.TryParse(Console.ReadLine(), out enteredNumber);
                     switch (enteredNumber)
@@ -160,19 +159,15 @@ internal class Program
                             await AddOrder();
                             break;
                         case 2:
-                            //    await UpdateOrder();
-                            break;
-
-                        case 3:
-                            //    await DeleteOrder();
+                            await DeleteOrder();
                             break;
 
                         case 4:
-                            //    await GetOrder();
+                            await GetOrder();
                             break;
 
                         case 5:
-                            //     await GetOrders();
+                            await GetOrders();
                             break;
 
                         case 6:
@@ -373,7 +368,7 @@ internal class Program
             var result = await productClient.GetAllAsync(new Google.Protobuf.WellKnownTypes.Empty { });
             if (result.Products != null && result.Products.Count > 0)
             {
-                Console.WriteLine("Customers Count: {0}", result.Products.Count);
+                Console.WriteLine("Products Count: {0}", result.Products.Count);
             }
             await PrintSubMenu(2);
         }
@@ -395,42 +390,103 @@ internal class Program
             Console.WriteLine("Please eneter CustomerId: ");
             int customerId = int.Parse(Console.ReadLine());
 
-            Console.WriteLine("Add your OrderItem: ");
-            var products = await productClient.GetAllAsync(new Google.Protobuf.WellKnownTypes.Empty());
-
-            Console.WriteLine("available Products: ");
-            foreach (var product in products.Products)
+            List<OrderItemRequest> orderItemRequests = await AddOrderItems(orderId);
+            Console.WriteLine("Do you want to add another order item (y/n)?");
+            var response = Console.ReadLine();
+            if (response.ToLower() == "y")
             {
-                Console.WriteLine($"ProductId: {product.Id} ProductName: {product.Name}");
+                orderItemRequests.AddRange(await AddOrderItems(orderId));
             }
-            Console.WriteLine("Please eneter ProductId: ");
-            int productId = int.Parse(Console.ReadLine());
+            else
+            {
+                var request = new OrderRequest
+                {
+                    CustomerId = customerId,
+                    Id = orderId,
+                };
+                request.OrderItems.AddRange(orderItemRequests);
+                var result = await orderClient.AddAsync(request);
+
+                if (result.IsSuccess)
+                {
+                    Console.WriteLine(result.Message);
+                }
+                else
+                {
+                    Console.WriteLine(result.Message);
+                }
+                await PrintSubMenu(3);
+            }
+
+            async Task<List<OrderItemRequest>> AddOrderItems(int orderId)
+            {
+                Console.WriteLine("Add your OrderItem: ");
+                var products = await productClient.GetAllAsync(new Google.Protobuf.WellKnownTypes.Empty());
+
+                Console.WriteLine("available Products: ");
+                foreach (var product in products.Products)
+                {
+                    Console.WriteLine($"ProductId: {product.Id} ProductName: {product.Name}");
+                }
+                Console.WriteLine("Please eneter ProductId: ");
+                int productId = int.Parse(Console.ReadLine());
 
 
-            List<OrderItemRequest> orderItemRequests = new List<OrderItemRequest>();
-            OrderItemRequest orderItemRequest = new OrderItemRequest
+                List<OrderItemRequest> orderItemRequests = new List<OrderItemRequest>();
+                OrderItemRequest orderItemRequest = new OrderItemRequest
+                {
+                    Id = orderId + 120,
+                    OrderId = orderId,
+                    ProductId = productId
+                };
+                return orderItemRequests;
+            }
+        }
+
+        async Task DeleteOrder()
+        {
+            Console.WriteLine("Your selected operation is delete Order.. please enter Id of Order you want to be deleted:");
+            int orderId = int.Parse(Console.ReadLine());
+            Console.WriteLine("Enter your new infromation for Order with id:{0}", orderId);
+            var result = await orderClient.DeleteAsync(new DeleteOrderRequest { Id = orderId });
+            if (result.IsSuccess)
             {
-                Id = orderId + 120,
-                OrderId = orderId,
-                ProductId = productId
-            };
-            var request = new OrderRequest
+                Console.WriteLine("Order with id {0} is deleted successfully...", orderId);
+            }
+            else
             {
-                CustomerId = customerId,
-                Id = orderId,
-            };
-            request.OrderItems.AddRange(orderItemRequests);
-            var result = await orderClient.AddAsync(request);
+                Console.WriteLine("delete operation is not successful. Error:", result.Message);
+            }
+            await PrintSubMenu(3);
+        }
+        async Task GetOrder()
+        {
+            Console.WriteLine("Your selected operation is get Order.. please enter Id of Order you want:");
+
+            int orderId = int.Parse(Console.ReadLine());
+            var result = await orderClient.GetAsync(new GetOrderRequest { Id = orderId });
 
             if (result.IsSuccess)
             {
-                Console.WriteLine(result.Message);
+                Console.WriteLine($"Order CreateDate is {result.Order.CreateDate} and CustomerId is {result.Order.CustomerId}");
             }
             else
             {
                 Console.WriteLine(result.Message);
             }
             await PrintSubMenu(3);
+
         }
+        async Task GetOrders()
+        {
+            Console.WriteLine("You selected GetAll Orders..");
+            var result = await orderClient.GetAllAsync(new Google.Protobuf.WellKnownTypes.Empty { });
+            if (result.Orders != null && result.Orders.Count > 0)
+            {
+                Console.WriteLine("Orders Count: {0}", result.Orders.Count);
+            }
+            await PrintSubMenu(2);
+        }
+
     }
 }
