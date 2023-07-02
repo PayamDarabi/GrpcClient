@@ -1,5 +1,6 @@
-﻿using Grpc.Net.Client;
-using CustomerServiceClient;
+﻿using CustomerServiceClient;
+using Grpc.Net.Client;
+using System.Globalization;
 
 internal class Program
 {
@@ -8,8 +9,10 @@ internal class Program
         Customer.CustomerClient customerClient;
         Product.ProductClient productClient;
         Order.OrderClient orderClient;
+
         int enteredNumber = 0;
         bool isValid = false;
+        ChangeConsoleStyle();
 
         CreateGrpcClients();
         await MainMenu();
@@ -18,12 +21,13 @@ internal class Program
         {
             enteredNumber = 0;
 
-            Console.WriteLine("---------------------------------------------------");
-            Console.WriteLine("Enter which section you want to operate from this list:");
-            Console.WriteLine("[1] Customer Menu");
-            Console.WriteLine("[2] Product Menu");
-            Console.WriteLine("[3] Order Menu");
-            Console.WriteLine("[4] Exit");
+            Console.WriteLine("Choose an option:");
+            Console.WriteLine("1) Customer Menu");
+            Console.WriteLine("2) Product Menu");
+            Console.WriteLine("3) Order Menu");
+            Console.WriteLine("4) Exit");
+
+            Console.Write("\r\nSelect an option: ");
 
             isValid = int.TryParse(Console.ReadLine(), out enteredNumber);
             if (isValid)
@@ -58,18 +62,19 @@ internal class Program
         }
         async Task PrintSubMenu(int menu)
         {
-
             switch (menu)
             {
                 case 1:
-                    Console.WriteLine("---------------------------------------------------");
-                    Console.WriteLine("Welcome to Customer area.. please enter a number: ");
+                    Console.WriteLine("\r\nChoose an option from Customer Menu:");
+
                     Console.WriteLine("[1] Add Customer");
                     Console.WriteLine("[2] Update Customer");
                     Console.WriteLine("[3] Delete Customer");
                     Console.WriteLine("[4] Get Customer");
                     Console.WriteLine("[5] GetAll Customers");
                     Console.WriteLine("[6] Back To MainMenu");
+
+                    Console.Write("\r\nSelect an option: ");
 
                     isValid = int.TryParse(Console.ReadLine(), out enteredNumber);
                     switch (enteredNumber)
@@ -103,7 +108,8 @@ internal class Program
 
                     break;
                 case 2:
-                    Console.WriteLine("---------------------------------------------------");
+                    Console.WriteLine("\r\nChoose an option from Product Menu:");
+
                     Console.WriteLine("Welcome to Product area.. please enter a number: ");
                     Console.WriteLine("[1] Add Product");
                     Console.WriteLine("[2] Update Product");
@@ -111,6 +117,8 @@ internal class Program
                     Console.WriteLine("[4] Get Product");
                     Console.WriteLine("[5] GetAll Products");
                     Console.WriteLine("[6] Back To MainMenu");
+
+                    Console.Write("\r\nSelect an option: ");
 
                     isValid = int.TryParse(Console.ReadLine(), out enteredNumber);
                     switch (enteredNumber)
@@ -144,7 +152,8 @@ internal class Program
 
                     break;
                 case 3:
-                    Console.WriteLine("---------------------------------------------------");
+                    Console.WriteLine("\r\nChoose an option from Order Menu:");
+
                     Console.WriteLine("Welcome to Order area.. please enter a number: ");
                     Console.WriteLine("[1] Add Order");
                     Console.WriteLine("[2] Delete Order");
@@ -152,25 +161,28 @@ internal class Program
                     Console.WriteLine("[4] GetAll Order");
                     Console.WriteLine("[5] Back To MainMenu");
 
+                    Console.Write("\r\nSelect an option: ");
+
                     isValid = int.TryParse(Console.ReadLine(), out enteredNumber);
                     switch (enteredNumber)
                     {
                         case 1:
                             await AddOrder();
                             break;
+
                         case 2:
                             await DeleteOrder();
                             break;
 
-                        case 4:
+                        case 3:
                             await GetOrder();
                             break;
 
-                        case 5:
+                        case 4:
                             await GetOrders();
                             break;
 
-                        case 6:
+                        case 5:
                             await MainMenu();
                             break;
 
@@ -191,17 +203,23 @@ internal class Program
 
         async Task AddCustomer()
         {
-            Console.WriteLine("Please enter required information: ");
-            Console.WriteLine("CustomerId: ");
+            Console.WriteLine("\r\nEnter Customer information: ");
+            Console.Write("Customer Id: ");
             int customerId = int.Parse(Console.ReadLine());
 
-            Console.WriteLine("CustomerName: ");
+            Console.Write("Customer Name: ");
             string customerName = Console.ReadLine();
 
-            Console.WriteLine("CustomerAge: ");
+            Console.Write("Customer Age: ");
             int customerAge = int.Parse(Console.ReadLine());
 
-            var result = await customerClient.AddAsync(new CustomerRequest { Id = customerId, Age = customerAge, Name = customerName });
+            var result = await customerClient.AddAsync(new CustomerRequest
+            {
+                Id = customerId,
+                Age = customerAge,
+                Name = customerName
+            });
+
             if (result.IsSuccess)
             {
                 Console.WriteLine(result.Message);
@@ -210,50 +228,62 @@ internal class Program
             {
                 Console.WriteLine(result.Message);
             }
+
             await PrintSubMenu(1);
         }
         async Task UpdateCustomer()
         {
-            Console.WriteLine("Your selected operation is update customer.. please enter Id of customer you want to be updated:");
+            Console.Write("\r\nEnter Id of Customer you want to update:");
             int customerId = int.Parse(Console.ReadLine());
             var customerReply = await customerClient.GetAsync(new GetCustomerRequest { Id = customerId });
-
-            Console.WriteLine("Enter your new infromation for customer with id:{0}", customerReply.Customer.Id);
-            Console.WriteLine("CustomerName: ");
-            string customerName = Console.ReadLine();
-
-            Console.WriteLine("CustomerAge: ");
-            int customerAge = int.Parse(Console.ReadLine());
-            var result = await customerClient.UpdateAsync(new CustomerRequest { Id = customerReply.Customer.Id, Age = customerAge, Name = customerName });
-            if (result.IsSuccess)
+            if (customerReply.IsSuccess)
             {
-                Console.WriteLine(result.Message);
+                Console.WriteLine($"\r\nEnter infromation for Customer with Id: {customerReply.Customer.Id}");
+                Console.Write("CustomerName: ");
+                string customerName = Console.ReadLine();
+
+                Console.Write("CustomerAge: ");
+                int customerAge = int.Parse(Console.ReadLine());
+                var result = await customerClient.UpdateAsync(new CustomerRequest
+                {
+                    Id = customerReply.Customer.Id,
+                    Age = customerAge,
+                    Name = customerName
+                });
+
+                if (result.IsSuccess)
+                {
+                    Console.WriteLine(result.Message);
+                }
+                else
+                {
+                    Console.WriteLine(result.Message);
+                }
             }
             else
             {
-                Console.WriteLine(result.Message);
+                Console.WriteLine(customerReply.Message);
             }
             await PrintSubMenu(1);
         }
         async Task DeleteCustomer()
         {
-            Console.WriteLine("Your selected operation is delete customer.. please enter Id of customer you want to be deleted:");
+            Console.Write("\r\nEnter Id of Customer you want to Delete:");
             int customerId = int.Parse(Console.ReadLine());
-            Console.WriteLine("Enter your new infromation for customer with id:{0}", customerId);
             var result = await customerClient.DeleteAsync(new DeleteCustomerRequest { Id = customerId });
             if (result.IsSuccess)
             {
-                Console.WriteLine("Customer with id {0} is deleted successfully...", customerId);
+                Console.WriteLine($"Customer with Id: {customerId} is deleted successfully...");
             }
             else
             {
-                Console.WriteLine("delete operation is not successful. Error:", result.Message);
+                Console.WriteLine("Delete Customer was not successful. Error:", result.Message);
             }
             await PrintSubMenu(1);
         }
         async Task GetCustomer()
         {
-            Console.WriteLine("Your selected operation is get customer.. please enter Id of customer you want:");
+            Console.Write("\r\nEnter Id of Customer you want:");
 
             int customerId = int.Parse(Console.ReadLine());
             var result = await customerClient.GetAsync(new GetCustomerRequest { Id = customerId });
@@ -271,29 +301,40 @@ internal class Program
         }
         async Task GetCustomers()
         {
-            Console.WriteLine("Your selected operation is get all customers..");
             var result = await customerClient.GetAllAsync(new Google.Protobuf.WellKnownTypes.Empty { });
             if (result.Customers != null && result.Customers.Count > 0)
             {
-                Console.WriteLine("Customers Count: {0}", result.Customers.Count);
+                var customers = result.Customers;
+                Console.WriteLine($"Customers Count: {customers.Count}");
+
+                foreach (var customer in customers)
+                {
+                    Console.WriteLine($"CustomerName is {customer.Name} and CustomerAge is {customer.Age}");
+                }
             }
             await PrintSubMenu(1);
-
         }
 
         async Task AddProduct()
         {
-            Console.WriteLine("Please enter required information: ");
-            Console.WriteLine("ProductId: ");
+            Console.WriteLine("\r\nEnter Product information: ");
+
+            Console.Write("Product Id: ");
             int productId = int.Parse(Console.ReadLine());
 
-            Console.WriteLine("ProductName: ");
+            Console.Write("Product Name: ");
             string productName = Console.ReadLine();
 
-            Console.WriteLine("ProductPrice: ");
+            Console.Write("Product Price: ");
             double productPrice = int.Parse(Console.ReadLine());
 
-            var result = await productClient.AddAsync(new ProductRequest { Id = productId, Price = productPrice, Name = productName });
+            var result = await productClient.AddAsync(new ProductRequest
+            {
+                Id = productId,
+                Price = productPrice,
+                Name = productName
+            });
+
             if (result.IsSuccess)
             {
                 Console.WriteLine(result.Message);
@@ -306,33 +347,39 @@ internal class Program
         }
         async Task UpdateProduct()
         {
-            Console.WriteLine("Your selected operation is update Product.. please enter Id of Product you want to be updated:");
+            Console.WriteLine("\r\nEnter Id of Product you want to update:");
             int productId = int.Parse(Console.ReadLine());
             var productReply = await productClient.GetAsync(new GetProductRequest { Id = productId });
-
-            Console.WriteLine("Enter your new infromation for Product with id:{0}", productId);
-            Console.WriteLine("ProductName: ");
-            string productName = Console.ReadLine();
-
-            Console.WriteLine("ProductPrice: ");
-            double productPrice = double.Parse(Console.ReadLine());
-
-            var result = await productClient.UpdateAsync(new ProductRequest { Id = productReply.Product.Id, Price = productPrice, Name = productName });
-            if (result.IsSuccess)
+            if (productReply.IsSuccess)
             {
-                Console.WriteLine(result.Message);
+                Console.WriteLine($"Enter infromation for Product with id: {productId}");
+                Console.Write("Product Name: ");
+                string productName = Console.ReadLine();
+
+                Console.Write("Product Price: ");
+                double productPrice = double.Parse(Console.ReadLine());
+
+                var result = await productClient.UpdateAsync(new ProductRequest { Id = productReply.Product.Id, Price = productPrice, Name = productName });
+                if (result.IsSuccess)
+                {
+                    Console.WriteLine(result.Message);
+                }
+                else
+                {
+                    Console.WriteLine(result.Message);
+                }
             }
             else
             {
-                Console.WriteLine(result.Message);
+                Console.WriteLine(productReply.Message);
             }
             await PrintSubMenu(2);
         }
         async Task DeleteProduct()
         {
-            Console.WriteLine("Your selected operation is delete Product.. please enter Id of Product you want to be deleted:");
+            Console.WriteLine("\r\nEnter Id of Product you want to delete:");
             int productId = int.Parse(Console.ReadLine());
-            Console.WriteLine("Enter your new infromation for Product with id:{0}", productId);
+            Console.WriteLine($"Enter your new infromation for Product with Id: {productId}");
             var result = await productClient.DeleteAsync(new DeleteProductRequest { Id = productId });
             if (result.IsSuccess)
             {
@@ -346,21 +393,20 @@ internal class Program
         }
         async Task GetProduct()
         {
-            Console.WriteLine("Your selected operation is get Product.. please enter Id of Product you want:");
+            Console.WriteLine("\r\nEnter Id of Product to get:");
 
             int productId = int.Parse(Console.ReadLine());
             var result = await productClient.GetAsync(new GetProductRequest { Id = productId });
 
             if (result.IsSuccess)
             {
-                Console.WriteLine($"ProductName is {result.Product.Name} and Price is {result.Product.Price}");
+                Console.WriteLine($"Product Name is {result.Product.Name} and Price is {result.Product.Price}");
             }
             else
             {
                 Console.WriteLine(result.Message);
             }
             await PrintSubMenu(2);
-
         }
         async Task GetProducts()
         {
@@ -368,7 +414,13 @@ internal class Program
             var result = await productClient.GetAllAsync(new Google.Protobuf.WellKnownTypes.Empty { });
             if (result.Products != null && result.Products.Count > 0)
             {
-                Console.WriteLine("Products Count: {0}", result.Products.Count);
+                var products = result.Products;
+                Console.WriteLine($"Products Count: {products.Count}");
+
+                foreach (var product in products)
+                {
+                    Console.WriteLine($"Product Name is {product.Name} and Product Price is {product.Price}");
+                }
             }
             await PrintSubMenu(2);
         }
@@ -376,7 +428,7 @@ internal class Program
         async Task AddOrder()
         {
             Console.WriteLine("Please enter required information: ");
-            Console.WriteLine("Please enter OrderId: ");
+            Console.Write("Please enter OrderId: ");
             int orderId = int.Parse(Console.ReadLine());
 
             var customers = await customerClient.GetAllAsync(new Google.Protobuf.WellKnownTypes.Empty());
@@ -387,17 +439,46 @@ internal class Program
                 Console.WriteLine($"CustomerId: {customer.Id} CustomerName: {customer.Name}");
             }
 
-            Console.WriteLine("Please eneter CustomerId: ");
+            Console.Write("Please eneter CustomerId: ");
             int customerId = int.Parse(Console.ReadLine());
 
             List<OrderItemRequest> orderItemRequests = await AddOrderItems(orderId);
-            Console.WriteLine("Do you want to add another order item (y/n)?");
-            var response = Console.ReadLine();
-            if (response.ToLower() == "y")
+
+            await AddOrderRequest(orderId, customerId, orderItemRequests);
+            await PrintSubMenu(3);
+
+            async Task<List<OrderItemRequest>> AddOrderItems(int orderId)
             {
-                orderItemRequests.AddRange(await AddOrderItems(orderId));
+                Console.WriteLine("Add your OrderItem: ");
+                var products = await productClient.GetAllAsync(new Google.Protobuf.WellKnownTypes.Empty());
+
+                Console.WriteLine("available Products: ");
+                foreach (var product in products.Products)
+                {
+                    Console.WriteLine($"ProductId: {product.Id} ProductName: {product.Name}");
+                }
+                Console.Write("Please eneter ProductId: ");
+                int productId = int.Parse(Console.ReadLine());
+
+
+                List<OrderItemRequest> orderItemRequests = new List<OrderItemRequest>();
+                OrderItemRequest orderItemRequest = new OrderItemRequest
+                {
+                    Id = orderId + 120,
+                    OrderId = orderId,
+                    ProductId = productId
+                };
+                orderItemRequests.Add(orderItemRequest);
+                Console.Write("Do you want to add another order item (y/n)?");
+                var response = Console.ReadLine();
+                if (response.ToLower() == "y")
+                {
+                    orderItemRequests.AddRange(await AddOrderItems(orderId));
+                }
+                return orderItemRequests;
             }
-            else
+
+            async Task AddOrderRequest(int orderId, int customerId, List<OrderItemRequest> orderItemRequests)
             {
                 var request = new OrderRequest
                 {
@@ -415,60 +496,38 @@ internal class Program
                 {
                     Console.WriteLine(result.Message);
                 }
-                await PrintSubMenu(3);
-            }
-
-            async Task<List<OrderItemRequest>> AddOrderItems(int orderId)
-            {
-                Console.WriteLine("Add your OrderItem: ");
-                var products = await productClient.GetAllAsync(new Google.Protobuf.WellKnownTypes.Empty());
-
-                Console.WriteLine("available Products: ");
-                foreach (var product in products.Products)
-                {
-                    Console.WriteLine($"ProductId: {product.Id} ProductName: {product.Name}");
-                }
-                Console.WriteLine("Please eneter ProductId: ");
-                int productId = int.Parse(Console.ReadLine());
-
-
-                List<OrderItemRequest> orderItemRequests = new List<OrderItemRequest>();
-                OrderItemRequest orderItemRequest = new OrderItemRequest
-                {
-                    Id = orderId + 120,
-                    OrderId = orderId,
-                    ProductId = productId
-                };
-                return orderItemRequests;
             }
         }
 
         async Task DeleteOrder()
         {
-            Console.WriteLine("Your selected operation is delete Order.. please enter Id of Order you want to be deleted:");
+            Console.Write("\r\nEnter Id of Order you want to delete: ");
             int orderId = int.Parse(Console.ReadLine());
-            Console.WriteLine("Enter your new infromation for Order with id:{0}", orderId);
             var result = await orderClient.DeleteAsync(new DeleteOrderRequest { Id = orderId });
             if (result.IsSuccess)
             {
-                Console.WriteLine("Order with id {0} is deleted successfully...", orderId);
+                Console.WriteLine($"Order with Id: {orderId} is deleted successfully...");
             }
             else
             {
-                Console.WriteLine("delete operation is not successful. Error:", result.Message);
+                Console.WriteLine("Delete operation is not successful. Error:", result.Message);
             }
             await PrintSubMenu(3);
         }
         async Task GetOrder()
         {
-            Console.WriteLine("Your selected operation is get Order.. please enter Id of Order you want:");
+            Console.Write("\r\nEnter Id of Order to get: ");
 
             int orderId = int.Parse(Console.ReadLine());
             var result = await orderClient.GetAsync(new GetOrderRequest { Id = orderId });
 
             if (result.IsSuccess)
             {
-                Console.WriteLine($"Order CreateDate is {result.Order.CreateDate} and CustomerId is {result.Order.CustomerId}");
+                PersianCalendar pc = new PersianCalendar();
+                var date = result.Order.CreateDate.ToDateTime();
+                var persianDate = pc.GetYear(date) + "/" + pc.GetMonth(date) + "/" + pc.GetDayOfMonth(date) + " " + pc.GetHour(date) + ":" + pc.GetMinute(date) + ":" + pc.GetSecond(date);
+
+                Console.WriteLine($"Order CreateDate is {persianDate} and CustomerId is {result.Order.CustomerId}");
             }
             else
             {
@@ -479,14 +538,48 @@ internal class Program
         }
         async Task GetOrders()
         {
-            Console.WriteLine("You selected GetAll Orders..");
+            PersianCalendar pc = new PersianCalendar();
+            Console.WriteLine("GetAll Orders..");
             var result = await orderClient.GetAllAsync(new Google.Protobuf.WellKnownTypes.Empty { });
             if (result.Orders != null && result.Orders.Count > 0)
             {
-                Console.WriteLine("Orders Count: {0}", result.Orders.Count);
+                Console.WriteLine("Orders with details:\n");
+                foreach (var order in result.Orders)
+                {
+                    var date = order.CreateDate.ToDateTime();
+                    var persianDate = pc.GetYear(date) + "/" + pc.GetMonth(date) + "/" + pc.GetDayOfMonth(date) + " " + pc.GetHour(date) + ":" + pc.GetMinute(date) + ":" + pc.GetSecond(date);
+                    Console.WriteLine($"OrderId: {order.Id} PersianDate: {persianDate}");
+                    Console.WriteLine($"with items:");
+                    var customer = await customerClient.GetAsync(new GetCustomerRequest
+                    {
+                        Id = order.CustomerId
+                    });
+                    foreach (var orderItem in order.OrderItems)
+                    {
+                        var product = await productClient.GetAsync(new GetProductRequest
+                        {
+                            Id = orderItem.ProductId,
+                        });
+                        Console.WriteLine($"CustomerName: {customer.Customer.Name} ProductName: {product.Product.Name} with ProductPrice: {product.Product.Price}");
+                    }
+                }
             }
-            await PrintSubMenu(2);
+            await PrintSubMenu(3);
         }
 
+    }
+    
+    private static void ChangeConsoleStyle()
+    {
+        Console.BackgroundColor = ConsoleColor.Cyan;
+        Console.Clear();
+        Console.ForegroundColor = ConsoleColor.Black;
+        Console.WriteLine();
+        Console.WriteLine("***************************************");
+        Console.WriteLine();
+        Console.WriteLine("  " + "Welcome to Order Management System");
+        Console.WriteLine();
+        Console.WriteLine("***************************************");
+        Console.WriteLine();
     }
 }
