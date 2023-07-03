@@ -1,9 +1,9 @@
-# Order Management GrpcServer
+# Order Management GrpcClient
 <br/>
 <p align="center">
-   <h1 align="center">gRPC Server</h1>
+   <h1 align="center">gRPC Client</h1>
    <p align="center">
-    An Awesome Example For gRPC Server
+    This Is Example For gRPC Client With .Net Console Application
     <br/>
     <br/>
   </p>
@@ -28,19 +28,16 @@
 
 ## About The Project
 
+![Capture](https://github.com/PayamDarabi/GrpcClient/assets/8627007/96ef910a-c449-47c8-8873-4c9a6d387f43)
+
 gRPC is a cross-platform open source high performance remote procedure call framework. gRPC was initially created by Google, which used a single general-purpose RPC infrastructure called Stubby to connect the large number of microservices running within and across its data centers from about 2001.
 This project includes the complete implementation of a grpc server in which three different services have been created to meet the business needs of the project, which is a shopping cart and order registration system. You can use this example to implement the examples you want.
 
-This project includes the complete implementation of a grpc server in which three different services have been created to meet the business needs of the project (here is a shopping cart and order registration system).
+This project includes the complete implementation of a grpc client with console application in C# that uses  three different services have been created to meet the business needs of the project (here is a shopping cart and order registration system).
 
-The <b> Service </b> structure of this project is as follows:
-
-<b> Customer service </b> (to perform CRUD operations on the customer entity) </br>
-<b> Product service </b> (to perform CRUD operations on the product entity) </br>
-<b> Order service </b> (to perform CRUD operations on the order entity and order items (shopping cart)) </br>
-
-note that:
-For more simplicity, the service and repository layers are placed in the same project and in the corresponding folders. Also, instead of connecting to the database, static lists are used for storage in the repository layer. You can use this example to implement the specific services you want, or by participating in the project, you can add more features to the project.
+<b> Customer Menu </b> (to perform CRUD operations on the customer entity) </br>
+<b> Product Menu </b> (to perform CRUD operations on the product entity) </br>
+<b> Order Menu </b> (to perform CRUD operations on the order entity and order items (shopping cart)) </br>
 
 ## Built With
 
@@ -62,19 +59,41 @@ Visual Studio 2022 with the ASP.NET and web development workload.
 
 1. Clone the repo
 
-   ```sh
-   git clone https://github.com/PayamDarabi/GrpcServer.git
-   ```
-2. Enter your application runtime url in `launchSettings.json`
+```sh
+git clone https://github.com/PayamDarabi/GrpcClient.git
+```
+2. Add .proto files from gRPC server
+Create a Protos folder in the gRPC client project.
+Copy the Protos\.proto files from the Order Management Grpc Server to the Protos folder in the Order Management Grpc Client project.
 
-   ```JSON
-   "applicationUrl": "http://localhost:5213;https://localhost:7199",
-   ```
-3. Run the project
-   
-## Usage
+Update the namespace inside the .proto files to the project's namespace:
+ ```JSON
+ option csharp_namespace = "OrderManagementGrpcClient";
+ ```
+Edit the GrpcGreeterClient.csproj project file:
 
-This code shows how to create an ASP.NET Core gRPC Server. At the end, you'll have a gRPC service that responses to clients that need its functionalities.
+Right-click the project and select Edit Project File.
+Add an item group with a <Protobuf> element that refers to the greet.proto file:
+
+```XML
+
+<ItemGroup>
+	<Protobuf Include="Protos\customer.proto" GrpcServices="Client" />
+	<Protobuf Include="Protos\order.proto" GrpcServices="Client" />
+	<Protobuf Include="Protos\orderItem.proto" GrpcServices="Client" />
+	<Protobuf Include="Protos\product.proto" GrpcServices="Client" />
+</ItemGroup>
+```
+3.Update the gRPC client Program.cs file with the following code.
+
+```C#
+// The port number must match the port of the Order Management gRPC server.
+using var channel = GrpcChannel.ForAddress("https://localhost:7199");
+```
+In the preceding code, replace the localhost port number 7199 with the HTTPS port number specified in Properties/launchSettings.json within the Order Management Grpc Server project.
+Program.cs contains the entry point and logic for the gRPC client.
+
+4. Run the project
 
 ## Contributing
 
