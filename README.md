@@ -84,7 +84,7 @@ Add an item group with a <Protobuf> element that refers to the greet.proto file:
 	<Protobuf Include="Protos\product.proto" GrpcServices="Client" />
 </ItemGroup>
 ```
-3.Update the gRPC client Program.cs file with the following code.
+3. Update the gRPC client Program.cs file with the following code.
 
 ```C#
 // The port number must match the port of the Order Management gRPC server.
@@ -98,7 +98,7 @@ Program.cs contains the entry point and logic for the gRPC client.
 ## Contributing
 
 Contributions are what make the open source community such an amazing place to be learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-* If you have suggestions for adding or removing projects, feel free to [open an issue](https://github.com/PayamDarabi/GrpcServer/issues/new) to discuss it, or directly create a pull request after you edit the *README.md* file with necessary changes.
+* If you have suggestions for adding or removing projects, feel free to [open an issue](https://github.com/PayamDarabi/GrpcClient/issues/new) to discuss it, or directly create a pull request after you edit the *README.md* file with necessary changes.
 * Please make sure you check your spelling and grammar.
 * Create individual PR for each suggestion.
   
