@@ -3,9 +3,8 @@
 <p align="center">
    <h1 align="center">gRPC Client</h1>
    <p align="center">
-    This Is Example For gRPC Client With .Net Console Application
-    <br/>
-    <br/>
+    This Example written in .Net Console Application and Uses <a href="https://github.com/PayamDarabi/GrpcServer">GrpcServer</a> as server to communicate
+    
   </p>
   <p align="center">  
     <img  style="center" src=https://github.com/PayamDarabi/GrpcServer/assets/8627007/7c0d7308-6dbf-43f8-9f0a-61692e59cffc/>
